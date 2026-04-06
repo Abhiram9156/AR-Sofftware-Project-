@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card">
+    <h1 class="page-title">Dashboard Overview</h1>
+    <p class="section-subtitle">Real-time status of component circulation.</p>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3 style="color: var(--text-muted); margin-top: 0;">Currently Issued</h3>
+            <div class="stat-value" style="color: var(--warning);">{{ total_issued }}</div>
+            <div style="font-size: 0.9rem; color: var(--text-muted);">Awaiting usage update</div>
+        </div>
+        <div class="stat-card">
+            <h3 style="color: var(--text-muted); margin-top: 0;">Components Used</h3>
+            <div class="stat-value" style="color: var(--success);">{{ total_used }}</div>
+            <div style="font-size: 0.9rem; color: var(--text-muted);">Successfully consumed</div>
+        </div>
+        <div class="stat-card">
+            <h3 style="color: var(--text-muted); margin-top: 0;">Components Returned</h3>
+            <div class="stat-value" style="color: var(--primary);">{{ total_returned }}</div>
+            <div style="font-size: 0.9rem; color: var(--text-muted);">Back in stock</div>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="margin: 0;">Recent Transactions</h2>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{{ url_for('export_csv') }}" class="btn" style="background: var(--success); color: white;">Download Excel</a>
+            <a href="{{ url_for('issue_component') }}" class="btn btn-primary">+ Issue Component</a>
+        </div>
+    </div>
+
+    {% if recent_txs %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>SR Number</th>
+                    <th>Technician</th>
+                    <th>Component</th>
+                    <th>Qty</th>
+                    <th>Status</th>
+                    <th>Last Updated</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in recent_txs %}
+                <tr>
+                    <td style="font-weight: 600;">{{ tx.sr_number }}</td>
+                    <td>{{ tx.technician_name }}</td>
+                    <td>{{ tx.component_name }}</td>
+                    <td style="font-weight: 600;">{{ tx.quantity }}</td>
+                    <td>
+                        <span class="badge badge-{{ tx.status|lower }}">{{ tx.status }}</span>
+                    </td>
+                    <td style="color: var(--text-muted); font-size: 0.9rem;">{{ tx.updated_at }}</td>
+                    <td>
+                        {% if tx.status == 'Issued' %}
+                        <form action="{{ url_for('update_status', transaction_id=tx.id) }}" method="POST" class="action-form">
+                            <select name="status" class="action-select" required>
+                                <option value="" disabled selected>Update...</option>
+                                <option value="Used">Mark Used</option>
+                                <option value="Returned">Mark Returned</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                        </form>
+                        {% else %}
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">Completed</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color: var(--text-muted);">No recent transactions found. Issue your first component to get started.</p>
+    {% endif %}
+</div>
+{% endblock %}

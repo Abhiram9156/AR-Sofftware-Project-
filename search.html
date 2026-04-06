@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 2rem;">
+    <h1 class="page-title">Search SR History</h1>
+    <p class="section-subtitle">Enter an SR Number to see the full lifecycle of parts used or returned.</p>
+    
+    <form method="GET" action="{{ url_for('search_history') }}" style="display: flex; gap: 1rem; max-width: 600px;">
+        <input type="text" name="sr_number" value="{{ query }}" class="form-control" placeholder="Search SR Number..." required>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+</div>
+
+{% if query %}
+    <div class="card">
+        <h2 style="margin-top: 0;">Results for "{{ query }}"</h2>
+        
+        {% if history %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Qty</th>
+                            <th>Technician</th>
+                            <th>Status Event</th>
+                            <th>Issued Time</th>
+                            <th>Resolved Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in history %}
+                        <tr>
+                            <td style="font-weight: 600;">{{ item.component_name }}</td>
+                            <td style="font-weight: 600;">{{ item.quantity }}</td>
+                            <td>{{ item.technician_name }}</td>
+                            <td>
+                                <span class="badge badge-{{ item.status|lower }}">{{ item.status }}</span>
+                            </td>
+                            <td style="color: var(--text-muted); font-size: 0.9rem;">{{ item.issued_at }}</td>
+                            <td style="color: var(--text-muted); font-size: 0.9rem;">
+                                {% if item.status != 'Issued' %}
+                                    {{ item.updated_at }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 2rem 0; color: var(--text-muted);">
+                <p>No history found for SR Number <strong>{{ query }}</strong>.</p>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
+
+{% endblock %}

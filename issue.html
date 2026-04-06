@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <h1 class="page-title">Issue Components</h1>
+    <p class="section-subtitle">Link multiple components to a single Service Request.</p>
+    
+    <form method="POST" action="{{ url_for('issue_component') }}" id="issueForm">
+        <!-- Top Details -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="form-group">
+                <label for="sr_number">Service Request (SR) Number</label>
+                <input type="text" id="sr_number" name="sr_number" class="form-control" placeholder="e.g. SR-1025" required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="technician_id">Assigned Technician</label>
+                <select id="technician_id" name="technician_id" class="form-control" required>
+                    <option value="">Select Technician...</option>
+                    {% for tech in technicians %}
+                    <option value="{{ tech.id }}">{{ tech.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Components List -->
+        <h3 style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Parts Required</h3>
+        
+        <div id="component-container">
+            <!-- First Row -->
+            <div class="component-row" style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
+                <div class="form-group" style="flex: 2; margin-bottom: 0;">
+                    <label>Component</label>
+                    <select name="component_id[]" class="form-control" required>
+                        <option value="">Select Component...</option>
+                        {% for comp in components %}
+                        <option value="{{ comp.id }}">{{ comp.name }} (Stock: {{ comp.stock_quantity }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                    <label>Quantity</label>
+                    <input type="number" name="quantity[]" class="form-control" min="1" value="1" required>
+                </div>
+                <div style="flex: 0;">
+                    <button type="button" class="btn btn-sm" onclick="this.parentElement.parentElement.remove()" style="background: rgba(239, 68, 68, 0.2); color: #EF4444; height: 42px;">X</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 1rem; margin-bottom: 2rem;">
+            <button type="button" class="btn btn-sm" onclick="addTemplateRow()" style="background: rgba(255, 255, 255, 0.1); border: 1px dashed var(--border-color);">+ Add Another Component</button>
+        </div>
+
+        <!-- Submit -->
+        <div style="border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 1rem;">Submit Entire Issue List</button>
+        </div>
+    </form>
+</div>
+
+<!-- Hidden Template for JavaScript to Clone -->
+<div id="row-template" style="display: none;">
+    <div class="component-row" style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
+        <div class="form-group" style="flex: 2; margin-bottom: 0;">
+            <label>Component</label>
+            <select name="component_id[]" class="form-control" required>
+                <option value="">Select Component...</option>
+                {% for comp in components %}
+                <option value="{{ comp.id }}">{{ comp.name }} (Stock: {{ comp.stock_quantity }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label>Quantity</label>
+            <input type="number" name="quantity[]" class="form-control" min="1" value="1" required>
+        </div>
+        <div style="flex: 0;">
+            <button type="button" class="btn btn-sm" onclick="this.parentElement.parentElement.remove()" style="background: rgba(239, 68, 68, 0.2); color: #EF4444; height: 42px;">X</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function addTemplateRow() {
+    const template = document.getElementById('row-template').innerHTML;
+    const container = document.getElementById('component-container');
+    container.insertAdjacentHTML('beforeend', template);
+}
+</script>
+{% endblock %}
